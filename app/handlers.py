@@ -219,8 +219,8 @@ async def sos(message: Message):
 
 @router.callback_query(F.data == 'install_app')
 async def install_app(callback_query: CallbackQuery):
-    x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n🤖 - все устройства Android\n🖥 - ПК и ноутбуки Windows\n\n<i>Ссылка для ручного подключения, нажмите чтобы скопировать в буфер ↓</i>\n<code>http://148.253.215.32/sub{user_info(str(message.chat.id), 2)}</code>"""
-    await message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
+    x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n🤖 - все устройства Android\n🖥 - ПК и ноутбуки Windows\n\n<i>Ссылка для ручного подключения, нажмите чтобы скопировать в буфер ↓</i>\n<code>http://148.253.215.32/sub{user_info(str(callback_query.message.chat.id), 2)}</code>"""
+    await callback_query.message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
 
 @router.message(F.text == '💳 Оплатить доступ')
 async def buy_sub(message: Message):
