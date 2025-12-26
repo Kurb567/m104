@@ -88,7 +88,7 @@ def add_user(mons, tgId, first_name):
         "enable": True,
         "expiryTime": 0,
         "port": random.randint(40, 10000),  # новый порт
-        "protocol": "vmess",
+        "protocol": "vless",
         "settings": json.dumps({
             "clients": [{
                 "id": tgId,
@@ -103,13 +103,34 @@ def add_user(mons, tgId, first_name):
             "decryption": "none",
             "fallbacks": []
         }),
+        
         "streamSettings": json.dumps({
-            "network": "tcp",
-            "security": "none",
-            "tcpSettings": {"header": {"type": "none"}}
+            "network": "ws",
+            "security": "tls",
+            "tlsSettings": {
+                "serverName": "vpnhapp.online",
+                "certificates": [
+                    {
+                        "certificateFile": "/root/cert/vpnhapp.online/fullchain.pem",
+                        "keyFile": "/root/cert/vpnhapp.online/privkey.pem"
+
+                    }
+                ],
+                "alpn": ["http/1.1"]
+            },
+            "wsSettings": {
+                "path": "/",
+                "headers": {
+                    "Host": "vpnhapp.online"
+                }
+            }
         }),
-        "sniffing": json.dumps({"enabled": True, "destOverride": ["http","tls"]})
+        "sniffing": json.dumps({
+            "enabled": True,
+            "destOverride": ["http", "tls"]
+        })
     }
+       
     response = session.post(f"{URL_PANEL}/panel/api/inbounds/add", json=data)
     if response.json()['success']:
         session.close()
