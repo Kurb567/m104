@@ -194,11 +194,14 @@ def user_info(id1, option):
     for i in range(1000):
         if r['obj'][i]['clientStats'][0]['email'] == id1:
             x1 = r['obj'][i]['clientStats'][0]['subId']
+            x2 = r['obj'][i]['port']
             x = r['obj'][i] 
             x2 = i
             break
     if option == 2:
         return x1
+    if option == 3:
+        return x2    
     settings = json.loads(x['settings'])
     ex_time = settings['clients'][0]['expiryTime']
     del settings
@@ -303,8 +306,8 @@ ID операции: <code>{payment_id}</code>
 class connect_device:
     @router.callback_query(F.data == 'desktop_1')
     async def desktop_1(callback_query: CallbackQuery):
-        await callback_query.message.answer(f"Нажмите ниже: если приложение уже установлено", parse_mode="HTML", reply_markup=kb.connect(user_info(str(callback_query.message.chat.id), 2), 'windows'))
+        await callback_query.message.answer(f"Нажмите ниже: если приложение уже установлено", parse_mode="HTML", reply_markup=kb.connect(callback_query.message.chat.id, user_info(str(callback_query.message.chat.id), 2), user_info(str(callback_query.message.chat.id), 2), 'windows'))
     
     @router.callback_query(F.data == 'tel1')
     async def tel_1(callback_query: CallbackQuery):
-        await callback_query.message.answer("Нажмите ниже: если приложение уже установлено", reply_markup=kb.connect(user_info(str(callback_query.message.chat.id), 2), 'tel'))
+        await callback_query.message.answer("Нажмите ниже: если приложение уже установлено", reply_markup=kb.connect(callback_query.message.chat.id, user_info(str(callback_query.message.chat.id), 2), user_info(str(callback_query.message.chat.id), 2), 'tel'))
