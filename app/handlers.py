@@ -87,7 +87,7 @@ def add_user(mons, tgId, first_name):
         "remark": first_name,
         "enable": True,
         "expiryTime": 0,
-        "port": random.randint(40, 10000),  # новый порт
+        "port": 443,  # новый порт
         "protocol": "vless",
         "settings": json.dumps({
             "clients": [{
@@ -306,8 +306,8 @@ ID операции: <code>{payment_id}</code>
 class connect_device:
     @router.callback_query(F.data == 'desktop_1')
     async def desktop_1(callback_query: CallbackQuery):
-        await callback_query.message.answer(f"Нажмите ниже: если приложение уже установлено", parse_mode="HTML", reply_markup=kb.connect(callback_query.message.chat.id, user_info(str(callback_query.message.chat.id), 2), user_info(str(callback_query.message.chat.id), 2), 'windows'))
+        await callback_query.message.answer(f"Нажмите ниже: если приложение уже установлено", parse_mode="HTML", reply_markup=kb.connect(callback_query.message.chat.id, user_info(str(callback_query.message.chat.id), 2), 'windows'))
     
     @router.callback_query(F.data == 'tel1')
     async def tel_1(callback_query: CallbackQuery):
-        await callback_query.message.answer("Нажмите ниже: если приложение уже установлено", reply_markup=kb.connect(callback_query.message.chat.id, user_info(str(callback_query.message.chat.id), 2), user_info(str(callback_query.message.chat.id), 2), 'tel'))
+        await callback_query.message.answer("Нажмите ниже: если приложение уже установлено", reply_markup=kb.connect(callback_query.message.chat.id, user_info(str(callback_query.message.chat.id), 2), 'tel'))

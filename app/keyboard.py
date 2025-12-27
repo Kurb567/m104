@@ -7,9 +7,9 @@ cmd_start_kb = ReplyKeyboardMarkup(keyboard=[
 ], resize_keyboard=True)
 
 install_app_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Скачать IOS 🍏', url='https://apps.apple.com/us/app/happ-proxy-utility/id6504287215?l=ru'),
+    [InlineKeyboardButton(text='Скачать IOS 🍏', url='https://apps.apple.com/ru/app/v2raytun/id6476628951'),
     InlineKeyboardButton(text='Подключить IOS 🍏', callback_data='tel1')],
-    [InlineKeyboardButton(text='Скачать Android 🤖',url='https://play.google.com/store/apps/details?id=com.happproxy&hl=ru&pli=1'),
+    [InlineKeyboardButton(text='Скачать Android 🤖',url='https://play.google.com/store/apps/details?id=com.v2raytun.android&hl=ru),
     InlineKeyboardButton(text='Подключить Android 🤖', callback_data='tel1')],
     [InlineKeyboardButton(text='Скачать Windows 🖥', url='https://github.com/hiddify/hiddify-app/releases/latest/download/Hiddify-Windows-Setup-x64.Msix'),
     InlineKeyboardButton(text='Подключить Windows ', callback_data='desktop_1')],
@@ -25,11 +25,11 @@ buy_sub_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='💳 12 мес | 1800р', callback_data='buy_sub_12')],
      ])
 
-def connect(tgId, subId, port, option):
+def connect(tgId, subId, option):
     if option == 'windows':
         return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = 'Подключить', url=f'https://app.klexvpn.com/?url=hiddify://import/http://148.253.215.32:2096/sub/{subId}')]])
     else:
-        return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = 'Подключить', url=f'https://app.klexvpn.com/?url=v2raytun://import/vless://{tgId}@vpnhapp.online:{port}?type=ws&encryption=none&path=%2F&host=vpnhapp.online&security=tls&fp=chrome&alpn=http%2F1.1&sni=vpnhapp.online#happvpn.online')]])
+        return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = 'Подключить', url=f'https://app.klexvpn.com/?url=v2raytun://import/http://148.253.215.32:2096/sub/{subId}')]])
 
 def check_pay(url, payment_id, mons):
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = '💳 Оплатить', url=f'{url}')], [InlineKeyboardButton(text = 'Проверить оплату', callback_data=f'pay_{payment_id}_{mons}')]])
