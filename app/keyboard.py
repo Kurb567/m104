@@ -29,7 +29,7 @@ def connect(tgId, subId, port, option):
     if option == 'windows':
         return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = 'Подключить', url=f'https://app.klexvpn.com/?url=hiddify://import/http://148.253.215.32:2096/sub/{subId}')]])
     else:
-        return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = 'Подключить', url=f'https://app.klexvpn.com/?url=v2raytun://import/vless://{tgId}@vpnhapp.online:8094?type=ws&encryption=none&path=%2F&host=vpnhapp.online&security=tls&fp=chrome&alpn=http%2F1.1&sni=vpnhapp.online#happvpn.online')]])
+        return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = 'Подключить', url=f'https://app.klexvpn.com/?url=v2raytun://import/vless://{tgId}@vpnhapp.online:{port}?type=ws&encryption=none&path=%2F&host=vpnhapp.online&security=tls&fp=chrome&alpn=http%2F1.1&sni=vpnhapp.online#happvpn.online')]])
 
 def check_pay(url, payment_id, mons):
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = '💳 Оплатить', url=f'{url}')], [InlineKeyboardButton(text = 'Проверить оплату', callback_data=f'pay_{payment_id}_{mons}')]])
