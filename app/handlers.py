@@ -273,7 +273,7 @@ class Buy_Sub:
         if mons == '2':
             mons = '12'
         rub = f'{int(mons)*150}.00'  
-        url, payment_id = create_payment(rub, "vpn", "https://t.me/HappPlus_bot")
+        url, payment_id = create_payment(rub, str(callback_query.message.chat.id), "https://t.me/HappPlus_bot")
         text = f"""💳 Оформление продления
 
 ⏱️ Срок: {int(mons)*30} дней
