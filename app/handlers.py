@@ -86,8 +86,8 @@ def add_user(mons, tgId, first_name):
         "total": 0,
         "remark": first_name,
         "enable": True,
-        "expiryTime": 0,
-        "port": 443,  # новый порт
+        "expiryTime": expiryTime,
+        "port": '4431',  # новый порт
         "protocol": "vless",
         "settings": json.dumps({
             "clients": [{
