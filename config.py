@@ -4,3 +4,4 @@ SECRET_KEY = 'live_hzTlvgkOH3CQpMehVsGlBop9zw5ybksnQglAj2QBk78'
 URL_PANEL = 'https://vpnhapp.online:445/cWtMoFNNjjM7uiHHaG'
 USER_NAME_PANEL = 'admin'
 PANEL_PASSWORD = '56731096842'
+    

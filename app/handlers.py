@@ -311,3 +311,4 @@ class connect_device:
     @router.callback_query(F.data == 'tel1')
     async def tel_1(callback_query: CallbackQuery):
         await callback_query.message.answer("Нажмите ниже: если приложение уже установлено", reply_markup=kb.connect(callback_query.message.chat.id, user_info(str(callback_query.message.chat.id), 2), 'tel'))
+     

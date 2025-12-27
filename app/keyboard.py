@@ -30,6 +30,7 @@ def connect(tgId, subId, option):
         return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = 'Подключить', url=f'https://app.klexvpn.com/?url=hiddify://import/http://148.253.215.32:2096/sub/{subId}')]])
     else:
         return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = 'Подключить', url=f'https://app.klexvpn.com/?url=v2raytun://import/http://148.253.215.32:2096/sub/{subId}')]])
-
+1
 def check_pay(url, payment_id, mons):
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = '💳 Оплатить', url=f'{url}')], [InlineKeyboardButton(text = 'Проверить оплату', callback_data=f'pay_{payment_id}_{mons}')]])
+    
