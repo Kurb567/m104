@@ -261,7 +261,7 @@ async def users(message: Message):
         c.execute("SELECT * from users")
     x = c.fetchall()
     text = ''
-    for i in x:
+    for i in x: 
         text += f'{i[0]} {i[1]} {i[2]}\n'
     await message.answer(text)
    
