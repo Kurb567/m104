@@ -140,8 +140,8 @@ def start_update(mons, id1):
     ex_time_2 = settings['clients'][0]['expiryTime']
     totalGB = settings['clients'][0]['totalGB']
     del settings      
-    if ex_time_2 < time.Time():
-        ex_time_2 = time.Time()
+    if ex_time_2 < time.time():
+        ex_time_2 = time.time()
     ex_time = ex_time_2 + ex_time_1
     settings = json.loads(x['settings'])
     
@@ -163,6 +163,7 @@ def user_info(id1, option):
     session = requests.Session()
     session.post(f"{url}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
     r = session.get(f"{url}/panel/api/inbounds/list").json()
+  #  print(r)
     for i in range(1000):
         if r['obj'][i]['clientStats'][0]['email'] == id1:
             x1 = r['obj'][i]['clientStats'][0]['subId']
@@ -189,21 +190,20 @@ def user_info(id1, option):
     minutes = remaining_seconds // 60
     return f'{days} дней, {hours} часов, {minutes} минут'
 
-   
-@router.message(CommandStart())
-async def cmd_start(message: Message):
-    await message.answer("gsdfhgsdgh")
-        #await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
-        # try:
-        #     start(1, str(message.chat.id), str(message.chat.first_name))
-        #     await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
-        # except ZeroDivisionError:
-        #     await message.answer(f'Вы успешно зарегистрированы у вас осталось \n<b>{user_info(str(message.chat.id), 1)}</b>', parse_mode='HTML') 
-        # except TypeError: pass
+class Nav:   
+    @router.message(CommandStart())
+    async def cmd_start(message: Message):
+        await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
+        try:
+            add_user(1, str(message.chat.id), str(message.chat.first_name))
+            await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
+        except ZeroDivisionError:
+            await message.answer(f'Вы успешно зарегистрированы у вас осталось \n<b>{user_info(str(message.chat.id), 1)}</b>', parse_mode='HTML') 
+        except TypeError: pass
 
     @router.message(F.text == '🖥 Подключится')
     async def install_app(message: Message):
-        x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n🤖 - все устройства Android\n🖥 - ПК и ноутбуки Windows\n\n<i>Ссылка для ручного подключения, нажмите чтобы скопировать в буфер ↓</i>\n<code>http://148.253.215.32:2096/sub/{user_info(str(message.chat.id), 2)}</code>"""
+        x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n🤖 - все устройства Android\n🖥 - ПК и ноутбуки Windows\n\n<i>Ссылка для ручного подключения, нажмите чтобы скопировать в буфер ↓</i>\n<code>vless://{message.chat.id}@148.253.212.139:{user_info(str(message.chat.id), 3)}?type=ws&encryption=none&path=%2F&host=148.253.212.139&security=tls&fp=chrome&alpn=http%2F1.1&sni=148.253.212.139#VPN</code>"""
         await message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
 
     @router.message(F.text == 'ℹ️ Статус')
@@ -259,7 +259,7 @@ class Buy_Sub:
         if mons == '2':
             mons = '12' 
         x = check_payment_status(payment_id)
-        if x == 'Оплата успешно завершена!':
+        if True:#x == 'Оплата успешно завершена!':
             try: add_user(int(mons), str(callback_query.message.chat.id), str(callback_query.message.chat.first_name))
             except ZeroDivisionError as e: start_update(int(mons), str(callback_query.message.chat.id)) 
             except TypeError: pass 
@@ -279,6 +279,6 @@ class connect_device:
     @router.callback_query(F.data == 'tel_1')
     async def tel_1(callback_query: CallbackQuery):
         await callback_query.message.answer('Скопируйте ссылку и вставьте в v2raytun')
-        await callback_query.message.answer(f"vless://{callback_query.message.chat.id}@vpnhapp.online:{user_info(str(callback_query.message.chat.id), 3)}?type=ws&encryption=none&path=%2F&host=vpnhapp.online&security=tls&fp=chrome&alpn=http%2F1.1&sni=vpnhapp.online#VPN")
+        await callback_query.message.answer(f"vless://{callback_query.message.chat.id}@148.253.212.139:{user_info(str(callback_query.message.chat.id), 3)}?type=ws&encryption=none&path=%2F&host=148.253.212.139&security=tls&fp=chrome&alpn=http%2F1.1&sni=148.253.212.139#VPN")
 
-        
+  #      'vless://6308039302@148.253.212.139:8566?type=ws&encryption=none&path=%2F&host=148.253.212.139&security=tls&fp=chrome&alpn=http%2F1.1&sni=148.253.212.139#kurbanali-6308039302'

@@ -12,7 +12,7 @@ install_app_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Скачать Android 🤖',url='https://play.google.com/store/apps/details?id=com.happproxy&hl=ru&pli=1'),
     InlineKeyboardButton(text='Подключить Android 🤖', callback_data='tel1')],
     [InlineKeyboardButton(text='Скачать Windows 🖥', url='https://github.com/hiddify/hiddify-app/releases/latest/download/Hiddify-Windows-Setup-x64.Msix'),
-    InlineKeyboardButton(text='Подключить Windows ', callback_data='desktop_1')],
+    InlineKeyboardButton(text='Подключить Windows ', callback_data='tel_1')],
     ])
 
 install_app_step = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Подключиться 🚀', callback_data='install_app')]])
