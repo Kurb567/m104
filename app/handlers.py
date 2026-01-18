@@ -16,12 +16,13 @@ import sqlite3
 
 
 router = Router()
-SHOP_ID = x.SHOP_ID
-SECRET_KEY = x.SECRET_KEY
-Configuration.configure(SHOP_ID, SECRET_KEY)
-URL_PANEL = x.URL_PANEL
+URL_PANEL_GERMAN = x.URL_PANEL_GERMAN
+URL_PANEL_POLAND = x.URL_PANEL_POLAND
+Configuration.configure(x.SHOP_ID, x.SECRET_KEY)
 USER_NAME_PANEL = x.USER_NAME_PANEL
 PANEL_PASSWORD = x.PANEL_PASSWORD
+IP_POLAND = x.IP_POLAND
+IP_GERMAN = x.IP_GERMAN
 
 def create_payment(amount, description, return_url):
     idempotence_key = str(uuid.uuid4())
@@ -52,11 +53,13 @@ def check_payment_status(payment_id):
     return payment.status
 
 def add_user(mons, tgId, first_name):
-    duration_days = 3
+    duration_days = 30
     duration_days *= mons
     expiryTime = int((time.time() + duration_days * 24 * 60 * 60) * 1000)
+    PORT = random.randint(40, 10000)
+    
     session = requests.Session()
-    session.post(f"{URL_PANEL}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
+    session.post(f"{URL_PANEL_GERMAN}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
     data = {
         "up": 0,
         "down": 0,
@@ -64,7 +67,7 @@ def add_user(mons, tgId, first_name):
         "remark": first_name,
         "enable": True,
         "expiryTime": 0,
-        "port": random.randint(40, 10000),  # новый порт
+        "port": PORT,  # новый порт
         "protocol": "vless",
         "settings": json.dumps({
             "clients": [{
@@ -85,7 +88,7 @@ def add_user(mons, tgId, first_name):
             "network": "ws",
             "security": "tls",
             "tlsSettings": {
-                "serverName": "148.253.212.139",
+                "serverName": '148.253.215.32',
                 "certificates": [
                     {
                         "certificateFile": "/root/cert/ip/fullchain.pem",
@@ -98,7 +101,7 @@ def add_user(mons, tgId, first_name):
             "wsSettings": {
                 "path": "/",
                 "headers": {
-                    "Host": "148.253.212.139"
+                    "Host": '148.253.215.32'
                 }
             }
         }),
@@ -108,7 +111,63 @@ def add_user(mons, tgId, first_name):
         })
     }
        
-    response = session.post(f"{URL_PANEL}/panel/api/inbounds/add", json=data)
+    response = session.post(f"{URL_PANEL_GERMAN}/panel/api/inbounds/add", json=data)
+#------------
+    session = requests.Session()
+    session.post(f"{URL_PANEL_POLAND}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
+    data = {
+        "up": 0,
+        "down": 0,
+        "total": 0,
+        "remark": first_name,
+        "enable": True,
+        "expiryTime": 0,
+        "port": PORT,  # новый порт
+        "protocol": "vless",
+        "settings": json.dumps({
+            "clients": [{
+                "id": tgId,
+                "email": tgId,
+                "limitIp": 2,
+                "totalGB": mons*1024 *1024*1024*200,
+                "expiryTime": expiryTime,
+                "enable": True,
+                "tgId": str(uuid.uuid4()),
+                "subId": str(uuid.uuid4())
+            }],
+            "decryption": "none",
+            "fallbacks": []
+        }),
+        
+        "streamSettings": json.dumps({
+            "network": "ws",
+            "security": "tls",
+            "tlsSettings": {
+                "serverName": '148.253.212.139',
+                "certificates": [
+                    {
+                        "certificateFile": "/root/cert/ip/fullchain.pem",
+                        "keyFile": "/root/cert/ip/privkey.pem"
+
+                    }
+                ],
+                "alpn": ["http/1.1"]
+            },
+            "wsSettings": {
+                "path": "/",
+                "headers": {
+                    "Host": '148.253.212.139'
+                }
+            }
+        }),
+        "sniffing": json.dumps({
+            "enabled": True,
+            "destOverride": ["http", "tls"]
+        })
+    }
+       
+    response = session.post(f"{URL_PANEL_POLAND}/panel/api/inbounds/add", json=data)
+    
     if response.json()['success']:
         session.close()
         return [tgId, first_name]
@@ -119,9 +178,7 @@ def add_user(mons, tgId, first_name):
 
 
 def start_update(mons, id1):
-    x1 = None
-    x2 = None
-    url = URL_PANEL
+    url = URL_PANEL_POLAND
     session = requests.Session()
     session.post(f"{url}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
     
@@ -145,25 +202,52 @@ def start_update(mons, id1):
     ex_time = ex_time_2 + ex_time_1
     settings = json.loads(x['settings'])
     
+    settings['clients'][0]['expiryTime'] = ex_time
+    settings['clients'][0]['totalGB'] = totalGB + totalGB1
+    x['settings'] = json.dumps(settings)
+    x['clientStats'][0]['expiryTime'] = ex_time
+    x['clientStats'][0]['totalGB'] = totalGB + totalGB1
+    session.post(f"{url}/panel/api/inbounds/update/50", json=x)
+    session.close()
     
+    url = URL_PANEL_GERMAN
+    session = requests.Session()
+    session.post(f"{url}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
+    
+    duration_days = 30
+    duration_days *= mons
+    totalGB1 = mons*1024 *1024*1024*200 
+    ex_time_1 = ((duration_days * 24 * 60 * 60) * 1000)
+
+    r = session.get(f"{url}/panel/api/inbounds/list").json()
+    for i in range(10000):
+        if r['obj'][i]['clientStats'][0]['email'] == id1:
+            x = r['obj'][i] 
+            break
+        
+    settings = json.loads(x['settings'])
+    ex_time_2 = settings['clients'][0]['expiryTime']
+    totalGB = settings['clients'][0]['totalGB']
+    del settings      
+    if ex_time_2 < time.time():
+        ex_time_2 = time.time()
+    ex_time = ex_time_2 + ex_time_1
+    settings = json.loads(x['settings'])
     
     settings['clients'][0]['expiryTime'] = ex_time
     settings['clients'][0]['totalGB'] = totalGB + totalGB1
     x['settings'] = json.dumps(settings)
-    #  x['clientStats'][0]['email'] = 0
     x['clientStats'][0]['expiryTime'] = ex_time
     x['clientStats'][0]['totalGB'] = totalGB + totalGB1
-    
-    print(x)
     session.post(f"{url}/panel/api/inbounds/update/50", json=x)
     session.close()
         
 def user_info(id1, option):
-    url = URL_PANEL
+   
+    url = URL_PANEL_POLAND
     session = requests.Session()
     session.post(f"{url}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
     r = session.get(f"{url}/panel/api/inbounds/list").json()
-  #  print(r)
     for i in range(1000):
         if r['obj'][i]['clientStats'][0]['email'] == id1:
             x1 = r['obj'][i]['clientStats'][0]['subId']
@@ -195,7 +279,7 @@ class Nav:
     async def cmd_start(message: Message):
         await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
         try:
-            add_user(1, str(message.chat.id), str(message.chat.first_name))
+            add_user(0.1, str(message.chat.id), str(message.chat.first_name))
             await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
         except ZeroDivisionError:
             await message.answer(f'Вы успешно зарегистрированы у вас осталось \n<b>{user_info(str(message.chat.id), 1)}</b>', parse_mode='HTML') 
@@ -203,7 +287,7 @@ class Nav:
 
     @router.message(F.text == '🖥 Подключится')
     async def install_app(message: Message):
-        x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n🤖 - все устройства Android\n🖥 - ПК и ноутбуки Windows\n\n<i>Ссылка для ручного подключения, нажмите чтобы скопировать в буфер ↓</i>\n<code>vless://{message.chat.id}@148.253.212.139:{user_info(str(message.chat.id), 3)}?type=ws&encryption=none&path=%2F&host=148.253.212.139&security=tls&fp=chrome&alpn=http%2F1.1&sni=148.253.212.139#VPN</code>"""
+        x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n🤖 - все устройства Android\n🖥 - ПК и ноутбуки Windows"""
         await message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
 
     @router.message(F.text == 'ℹ️ Статус')
@@ -216,7 +300,7 @@ class Nav:
 
     @router.callback_query(F.data == 'install_app')
     async def install_app(callback_query: CallbackQuery):
-        x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n🤖 - все устройства Android\n🖥 - ПК и ноутбуки Windows\n\n<i>Ссылка для ручного подключения, нажмите чтобы скопировать в буфер ↓</i>\n<code>http://148.253.215.32:2096/sub/{user_info(str(callback_query.message.chat.id), 2)}</code>"""
+        x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n🤖 - все устройства Android\n🖥 - ПК и ноутбуки Windows"""
         await callback_query.message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
 
     @router.message(F.text == '💳 Оплатить доступ')
@@ -227,17 +311,7 @@ class Nav:
     <blockquote>💳 Можно оплатить приложением банка, СБП и картой МИР</blockquote>"""
         await message.answer(text, parse_mode="HTML", reply_markup=kb.buy_sub_kb)
 
-    @router.message(F.text == 'Пользователи')
-    async def users(message: Message):
-        with sqlite3.connect('database.db') as conn:
-            c = conn.cursor()
-            c.execute("SELECT * from users")
-        x = c.fetchall()
-        text = ''
-        for i in x:
-            text += f'{i[0]} {i[1]} {i[2]}\n'
-        await message.answer(text)
-   
+  
       
 class Buy_Sub:
     @router.callback_query(F.data.startswith('buy_sub_'))
@@ -259,7 +333,7 @@ class Buy_Sub:
         if mons == '2':
             mons = '12' 
         x = check_payment_status(payment_id)
-        if True:#x == 'Оплата успешно завершена!':
+        if x == 'Оплата успешно завершена!':
             try: add_user(int(mons), str(callback_query.message.chat.id), str(callback_query.message.chat.first_name))
             except ZeroDivisionError as e: start_update(int(mons), str(callback_query.message.chat.id)) 
             except TypeError: pass 
@@ -267,18 +341,13 @@ class Buy_Sub:
         else: 
             await callback_query.message.answer(f'{x}')
 
-class connect_device:
-    # @router.callback_query(F.data == 'desktop_1')
-    # async def desktop_1(callback_query: CallbackQuery):
-    #     await callback_query.message.answer(f"Нажмите ниже: если приложение уже установлено", parse_mode="HTML", reply_markup=kb.connect(user_info(str(callback_query.message.chat.id), 2), 'windows'))
-    
-    @router.callback_query(F.data == 'tel1')
-    async def tel_1(callback_query: CallbackQuery):
-        await callback_query.message.answer("Нажмите ниже: если приложение уже установлено", reply_markup=kb.connect(user_info(str(callback_query.message.chat.id), 2), 'tel'))
-
-    @router.callback_query(F.data == 'tel_1')
-    async def tel_1(callback_query: CallbackQuery):
-        await callback_query.message.answer('Скопируйте ссылку и вставьте в v2raytun')
-        await callback_query.message.answer(f"vless://{callback_query.message.chat.id}@148.253.212.139:{user_info(str(callback_query.message.chat.id), 3)}?type=ws&encryption=none&path=%2F&host=148.253.212.139&security=tls&fp=chrome&alpn=http%2F1.1&sni=148.253.212.139#VPN")
-
-  #      'vless://6308039302@148.253.212.139:8566?type=ws&encryption=none&path=%2F&host=148.253.212.139&security=tls&fp=chrome&alpn=http%2F1.1&sni=148.253.212.139#kurbanali-6308039302'
+   
+@router.callback_query(F.data == 'tel_1')
+async def tel_1(callback_query: CallbackQuery):
+    PORT = user_info(str(callback_query.message.chat.id), 3)
+    await callback_query.message.answer(f"""Скопируте все конфиги и импортируйте их в приложение которое вы скачали \n
+    🇲🇨 POLAND
+    <code>vless://{callback_query.message.chat.id}@{IP_POLAND}:{PORT}?type=ws&encryption=none&path=%2F&host={IP_POLAND}&security=tls&fp=chrome&alpn=http%2F1.1&sni={IP_POLAND}#🇲🇨 POLAND</code> \n\n
+    🇩🇪 GERMAN
+    <code>vless://{callback_query.message.chat.id}@{IP_GERMAN}:{PORT}?type=ws&encryption=none&path=%2F&host={IP_GERMAN}&security=tls&fp=chrome&alpn=http%2F1.1&sni={IP_GERMAN}#🇩🇪 GERMAN</code>
+""", parse_mode="HTML")
