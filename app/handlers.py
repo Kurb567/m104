@@ -207,7 +207,8 @@ def start_update(mons, id1):
     x['settings'] = json.dumps(settings)
     x['clientStats'][0]['expiryTime'] = ex_time
     x['clientStats'][0]['totalGB'] = totalGB + totalGB1
-    session.post(f"{url}/panel/api/inbounds/update/50", json=x)
+    print(f"{x['clientStats'][0]['id']}")
+    session.post(f"{url}/panel/api/inbounds/updateClient/{id1}", json=x)
     session.close()
     
     url = URL_PANEL_GERMAN
@@ -239,7 +240,7 @@ def start_update(mons, id1):
     x['settings'] = json.dumps(settings)
     x['clientStats'][0]['expiryTime'] = ex_time
     x['clientStats'][0]['totalGB'] = totalGB + totalGB1
-    session.post(f"{url}/panel/api/inbounds/update/50", json=x)
+    session.post(f"{url}/panel/api/inbounds/updateClient/{id1}", json=x)
     session.close()
         
 def user_info(id1, option):
@@ -345,9 +346,9 @@ class Buy_Sub:
 @router.callback_query(F.data == 'tel_1')
 async def tel_1(callback_query: CallbackQuery):
     PORT = user_info(str(callback_query.message.chat.id), 3)
-    await callback_query.message.answer(f"""Скопируте все конфиги и импортируйте их в приложение которое вы скачали \n
-    🇲🇨 POLAND
-    <code>vless://{callback_query.message.chat.id}@{IP_POLAND}:{PORT}?type=ws&encryption=none&path=%2F&host={IP_POLAND}&security=tls&fp=chrome&alpn=http%2F1.1&sni={IP_POLAND}#🇲🇨 POLAND</code> \n\n
-    🇩🇪 GERMAN
+    await callback_query.message.answer(f"""1.Нажмите на ссылку чтобы она скопировалась\n2.Откройте приложение и нажмите плюс в правой верхней части экрана \n<b>3.Выберите импорт из буфера обмена </b>
+    <blockquote>🇲🇨 POLAND</blockquote>
+    <code>vless://{callback_query.message.chat.id}@{IP_POLAND}:{PORT}?type=ws&encryption=none&path=%2F&host={IP_POLAND}&security=tls&fp=chrome&alpn=http%2F1.1&sni={IP_POLAND}#🇲🇨 POLAND</code> 
+    <blockquote>🇩🇪 GERMAN</blockquote>
     <code>vless://{callback_query.message.chat.id}@{IP_GERMAN}:{PORT}?type=ws&encryption=none&path=%2F&host={IP_GERMAN}&security=tls&fp=chrome&alpn=http%2F1.1&sni={IP_GERMAN}#🇩🇪 GERMAN</code>
 """, parse_mode="HTML")
