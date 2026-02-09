@@ -1,28 +1,28 @@
-from aiogram.filters import CommandStart
-from yookassa import Configuration, Payment
-from aiogram.types import Message, CallbackQuery
 from aiogram import types, F, Router, Bot
-import app.keyboard as kb
-from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, CallbackQuery
+from aiogram.filters import CommandStart
 from aiogram.enums import ParseMode
-from aiogram.types import FSInputFile
+from yookassa import Configuration, Payment
+
+import app.keyboard as kb
 import config as x
-import requests
-import json
+import requests 
+import json 
 import uuid
-import random
+import random 
 import time
-import sqlite3
 
 
 router = Router()
 URL_PANEL_GERMAN = x.URL_PANEL_GERMAN
 URL_PANEL_POLAND = x.URL_PANEL_POLAND
-Configuration.configure(x.SHOP_ID, x.SECRET_KEY)
+URL_PANEL_NEEDERLAND = x.URL_PANEL_NEEDERLAND
 USER_NAME_PANEL = x.USER_NAME_PANEL
 PANEL_PASSWORD = x.PANEL_PASSWORD
+Configuration.configure(x.SHOP_ID, x.SECRET_KEY)
 IP_POLAND = x.IP_POLAND
 IP_GERMAN = x.IP_GERMAN
+IP_NEEDERLAND = x.IP_NEEDERLAND
 
 def create_payment(amount, description, return_url):
     idempotence_key = str(uuid.uuid4())
@@ -50,8 +50,9 @@ def check_payment_status(payment_id):
         return "Оплата отменена."
     elif payment.status == 'pending':
         return "Ожидание оплаты пользователем..."
-    return payment.status
+    return payment.status  
 
+    
 def add_user(mons, tgId, first_name):
     duration_days = 30
     duration_days *= mons
@@ -114,6 +115,108 @@ def add_user(mons, tgId, first_name):
     response = session.post(f"{URL_PANEL_GERMAN}/panel/api/inbounds/add", json=data)
 #------------
     session = requests.Session()
+    session.post(f"{URL_PANEL_NEEDERLAND}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
+    data = {
+    "id": 0,  # 0 для нового инбаунда
+    "userId": tgId,
+    "up": 0,
+    "down": 0,
+    "total": 0,
+    "allTime": 0,
+    "remark": "",
+    "enable": True,
+    "expiryTime": 0,
+    "trafficReset": "never",
+    "lastTrafficResetTime": 0,
+    "listen": "",
+    "port": PORT,
+    "protocol": "vless",
+    "settings": json.dumps({
+        "clients": [
+            {
+                "id": tgId,
+                "security": "",
+                "password": "",
+                "flow": "xtls-rprx-vision",
+                "email": tgId,  # email пользователя
+                "limitIp": 0,
+                "totalGB": 0,
+                "expiryTime": expiryTime,  # время истечения
+                "enable": True,
+                "tgId": tgId,
+                "subId": f'{tgId}-{PORT}',
+                "comment": "",
+                "reset": 0,
+                "created_at": int(time.time() * 1000),
+                "updated_at": int(time.time() * 1000)
+            }
+        ],
+        "decryption": "none",
+        "encryption": "none",
+        "testseed": [900, 500, 900, 256]
+    }, ensure_ascii=False),
+    "streamSettings": json.dumps({
+        "network": "tcp",
+        "security": "reality",
+        "externalProxy": [],
+        "realitySettings": {
+            "show": False,
+            "xver": 0,
+            "target": "api.vk.ru:443",
+            "serverNames": ["api.vk.ru"],
+            "privateKey": "AMKU-qwbEL9I-HgmFJyN_wWb0OCeGB3WMkDlvG6eT2g",
+            "minClientVer": "",
+            "maxClientVer": "",
+            "maxTimediff": 0,
+            "shortIds": [
+                "30288ee8", "4d", "b81ef2", "4b9d", "fbe9984473bb",
+                "5c8a987746627fa3", "e622c3039e", "5185906a2999da"
+            ],
+            "mldsa65Seed": "",
+            "settings": {
+                "publicKey": "MnNd4UgtPfmeBLDcYGUunP9CkdauibvF8Bb9owlyFFQ",
+                "fingerprint": "chrome",
+                "serverName": "",
+                "spiderX": "/",
+                "mldsa65Verify": ""
+            }
+        },
+        "tcpSettings": {
+            "acceptProxyProtocol": False,
+            "header": {
+                "type": "none"
+            }
+        }
+    }, ensure_ascii=False),
+    "tag": "inbound-443",
+    "sniffing": json.dumps({
+        "enabled": False,
+        "destOverride": ["http", "tls", "quic", "fakedns"],
+        "metadataOnly": False,
+        "routeOnly": False
+    }, ensure_ascii=False),
+    "clientStats": [
+        {
+            "id": int(tgId),
+            "inboundId": 0,
+            "enable": True,
+            "email": tgId,
+            "uuid": tgId,
+            "subId": f'{tgId}-{PORT}',
+            "up": 0,
+            "down": 0,
+            "allTime": 0,
+            "expiryTime": expiryTime,
+            "total": 0,
+            "reset": 0,
+            "lastOnline": 0
+        }
+    ]}
+
+    response = session.post(f"{URL_PANEL_NEEDERLAND}/panel/api/inbounds/add", json=data)
+    print(response.text)
+#------------
+    session = requests.Session()
     session.post(f"{URL_PANEL_POLAND}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
     data = {
         "up": 0,
@@ -165,7 +268,7 @@ def add_user(mons, tgId, first_name):
             "destOverride": ["http", "tls"]
         })
     }
-       
+
     response = session.post(f"{URL_PANEL_POLAND}/panel/api/inbounds/add", json=data)
     
     if response.json()['success']:
@@ -174,7 +277,7 @@ def add_user(mons, tgId, first_name):
     else:
         #print(response.json()['msg'])
         session.close()
-        return 10/0       
+        return 10/0
 
 
 def start_update(mons, id1):
@@ -241,15 +344,49 @@ def start_update(mons, id1):
     x['clientStats'][0]['expiryTime'] = ex_time
     x['clientStats'][0]['totalGB'] = totalGB + totalGB1
     session.post(f"{url}/panel/api/inbounds/updateClient/{id1}", json=x)
-    session.close()
+    session.close()        
+    
+
+    url = URL_PANEL_NEEDERLAND
+    session = requests.Session()
+    session.post(f"{url}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
+    
+    duration_days = 30
+    duration_days *= mons
+    totalGB1 = mons*1024 *1024*1024*200 
+    ex_time_1 = ((duration_days * 24 * 60 * 60) * 1000)
+
+    r = session.get(f"{url}/panel/api/inbounds/list").json()
+    for i in range(10000):
+        if r['obj'][i]['clientStats'][0]['email'] == id1:
+            x = r['obj'][i] 
+            break
         
+    settings = json.loads(x['settings'])
+    ex_time_2 = settings['clients'][0]['expiryTime']
+    totalGB = settings['clients'][0]['totalGB']
+    del settings      
+    if ex_time_2 < time.time():
+        ex_time_2 = time.time()
+    ex_time = ex_time_2 + ex_time_1
+    settings = json.loads(x['settings'])
+    
+    settings['clients'][0]['expiryTime'] = ex_time
+    settings['clients'][0]['totalGB'] = totalGB + totalGB1
+    x['settings'] = json.dumps(settings)
+    x['clientStats'][0]['expiryTime'] = ex_time
+    x['clientStats'][0]['totalGB'] = totalGB + totalGB1
+    print(f"{x['clientStats'][0]['id']}")
+    session.post(f"{url}/panel/api/inbounds/updateClient/{id1}", json=x)
+    session.close()
+
 def user_info(id1, option):
-   
+
     url = URL_PANEL_POLAND
     session = requests.Session()
     session.post(f"{url}/login", data={"username": USER_NAME_PANEL, "password": PANEL_PASSWORD})
     r = session.get(f"{url}/panel/api/inbounds/list").json()
-    for i in range(1000):
+    for i in range(10000):
         if r['obj'][i]['clientStats'][0]['email'] == id1:
             x1 = r['obj'][i]['clientStats'][0]['subId']
             x2 = r['obj'][i]['port']
@@ -273,7 +410,7 @@ def user_info(id1, option):
     hours = remaining_seconds // (60 * 60)
     remaining_seconds %= (60 * 60)
     minutes = remaining_seconds // 60
-    return f'{days} дней, {hours} часов, {minutes} минут'
+    return f'{days} дней, {hours} часов, {minutes} минут'    
 
 class Nav:   
     @router.message(CommandStart())
@@ -323,7 +460,7 @@ class Buy_Sub:
             mons = '12'
         rub = f'{int(mons)*150}.00'  
         url, payment_id = create_payment(rub, str(callback_query.message.chat.id), "https://t.me/HappPlus_bot")
-        text = f"""💳 Оформление продления \n\n⏱️ Срок: {int(mons)*30} дней\n📱 Лимит устройств: 2\n💰 Стоимость: {int(mons)*150} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>\n<blockquote>После оплаты нажмите <b>Проверить оплату</b></blockquote>"""
+        text = f"""💳 Оформление продления \n\n⏱️ Срок: {int(mons)*30} дней\n💰 Стоимость: {int(mons)*150} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>\n<blockquote>После оплаты нажмите <b>Проверить оплату</b></blockquote>"""
         await callback_query.message.answer(text, reply_markup=kb.check_pay(url, payment_id, mons))
         
     @router.callback_query(F.data.startswith('pay_'))
@@ -351,4 +488,6 @@ async def tel_1(callback_query: CallbackQuery):
     <code>vless://{callback_query.message.chat.id}@{IP_POLAND}:{PORT}?type=ws&encryption=none&path=%2F&host={IP_POLAND}&security=tls&fp=chrome&alpn=http%2F1.1&sni={IP_POLAND}#🇲🇨 POLAND</code> 
     <blockquote>🇩🇪 GERMAN</blockquote>
     <code>vless://{callback_query.message.chat.id}@{IP_GERMAN}:{PORT}?type=ws&encryption=none&path=%2F&host={IP_GERMAN}&security=tls&fp=chrome&alpn=http%2F1.1&sni={IP_GERMAN}#🇩🇪 GERMAN</code>
+    <blockquote>🇳🇱 NEEDERLAND Белые списки</blockquote>
+    <code>vless://{callback_query.message.chat.id}@{IP_NEEDERLAND}:{PORT}?type=tcp&encryption=none&security=reality&pbk=MnNd4UgtPfmeBLDcYGUunP9CkdauibvF8Bb9owlyFFQ&fp=chrome&sni=api.vk.ru&sid=30288ee8&spx=%2F&flow=xtls-rprx-vision#🇳🇱 NEEDERLAND Белые списки</code>
 """, parse_mode="HTML")
