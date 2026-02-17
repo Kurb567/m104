@@ -208,7 +208,7 @@ class Buy_Sub:
         if x == 'Оплата успешно завершена!':
             f = ''
             try: await add_user(int(mons), str(callback_query.message.chat.id))
-            except: f = await start_update(int(mons), '6308039302')#str(callback_query.message.from_user.id)) 
+            except: f = await start_update(int(mons), callback_query.message.chat.id)#str(callback_query.message.from_user.id)) 
              
             await callback_query.message.edit_text(f'✅ Подписка продлена \n {f}')
         else: 
