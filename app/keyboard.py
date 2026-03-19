@@ -15,7 +15,7 @@ install_app_kb = InlineKeyboardMarkup(inline_keyboard=[
     InlineKeyboardButton(text='Подключить Windows 💻', callback_data='tel_1')],
     [InlineKeyboardButton(text='Скачать Mac OS 🍏', url='https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973'),
     InlineKeyboardButton(text='Подключить MacOS 🍏', callback_data='tel_1')],
-    [InlineKeyboardButton(text='🆘 Видеоинструкция', callback_data='video_inf')]
+    [InlineKeyboardButton(text='🆘 Тех поддержка', url=f'tg://resolve?domain=Kurbanali567&text=ID пользователя:{id1}')]
     ])
 
 install_app_step = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Подключиться 🚀', callback_data='install_app')]])
