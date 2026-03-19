@@ -8,7 +8,6 @@ from marzban.models import UserModify
 import app.keyboard as kb
 import config as x
 import json 
-import uuid
 import random 
 import time
 
@@ -219,5 +218,4 @@ class Buy_Sub:
 async def tel_1(callback_query: CallbackQuery):
     x = await get_link(callback_query.message.chat.id)
     await callback_query.message.answer(f"""1.Нажмите на ссылку чтобы она скопировалась\n2.Откройте приложение и нажмите плюс в правой верхней части экрана \n<b>3.Выберите импорт из буфера обмена </b>
-    <blockquote>Нажмите на ссылку для копирования</blockquote><code>{x}</code>
-    """)
+    <blockquote>Нажмите на ссылку для копирования</blockquote>""", reply_markup=kb.copy(x))

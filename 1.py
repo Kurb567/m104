@@ -20,7 +20,9 @@ async def send_private_message(user_id: int, text: str):
 
 # Пример вызова:
 if __name__ == "__main__":
-    USER_ID = 7781754329  # ID получателя
-   # MESSAGE = 'https://ctjkk.duckdns.org:8000/sub/NTg2MzkyNjYzNywxNzcxMjcyMzQ383HKSw8XYe'
-    MESSAGE = "вот ваша ссылка скопируйте её и вставьте в приложение если возникнут проблемы напишите в тех поддержку"
-    asyncio.run(send_private_message(USER_ID, MESSAGE))
+    USER_ID = 8272002069#8272002069  # ID получателя
+    m = 'https://ctjkk.duckdns.org:8000/sub/ODI3MjAwMjA2OSwxNzcxNDEzOTQwKij-UOykHD'
+   
+    asyncio.run(send_private_message(USER_ID, m))
+    m = "вот ваша ссылка скопируйте её и вставьте в приложение если возникнут проблемы напишите в тех поддержку"
+    asyncio.run(send_private_message(USER_ID, m))
