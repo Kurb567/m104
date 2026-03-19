@@ -169,7 +169,8 @@ class Nav:
     @router.message(F.text == '🆘 Тех поддержка')
     async def sos(message: Message):
         await message.answer('🆘 Тех поддержка', reply_markup=kb.sos_kb(message.chat.id))
-    @router.callback_query(callback_data='sos_kb_1')
+    
+    @router.callback_query(F.data ='sos_kb_1')
     async def sos(callback_query: CallbackQuery):
         await callback_query.message.answer('🆘 Тех поддержка', reply_markup=kb.sos_kb(callback_query.message.chat.id))    
 
