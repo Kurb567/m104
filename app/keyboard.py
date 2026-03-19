@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, CopyTextButton
 
 
 cmd_start_kb = ReplyKeyboardMarkup(keyboard=[
@@ -34,4 +34,4 @@ def check_pay(url, payment_id, mons):
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = '💳 Оплатить', url=f'{url}')], [InlineKeyboardButton(text = 'Проверить оплату', callback_data=f'pay_{payment_id}_{mons}')]])
 
 def copy(x):
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Копировать', copy_text=CopyTextOption(text=x)),]])
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Копировать', copy_text=CopyTextButton(text=x)),]])
