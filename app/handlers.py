@@ -6,12 +6,14 @@ from yookassa import Configuration, Payment
 from marzban import MarzbanAPI, UserCreate
 from marzban.models import UserModify
 import app.keyboard as kb
+from check_pay_last_hour import *
 import config as x
 import json 
 import random 
 import time
 import uuid
 import datetime
+
 
 router = Router()
 Configuration.configure(x.SHOP_ID, x.SECRET_KEY)
@@ -43,36 +45,25 @@ async def add_user(mons, tgId):
 async def user_info(tgId: str):
     api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000")
     try:
-        # 1. Авторизация
         token = await api.get_token(username="admin", password="56731096842")
-        
-        # 2. Попытка получить юзера
         user = await api.get_user(username=tgId, token=token.access_token)
-        
         if not user.expire:
             return "Безлимитно"
-
-        # 3. Расчет времени
         now = datetime.datetime.now()
         expire_date = datetime.datetime.fromtimestamp(user.expire)
         delta = expire_date - now
-
         if delta.total_seconds() <= 0:
             return "Срок подписки истек"
-
         total_sec = int(delta.total_seconds())
-        
         months = total_sec // (30 * 24 * 3600)
         days = (total_sec % (30 * 24 * 3600)) // (24 * 3600)
         hours = (total_sec % (24 * 3600)) // 3600
         minutes = (total_sec % 3600) // 60
-
         parts = []
         if months > 0: parts.append(f"{months} мес")
         if days > 0: parts.append(f"{days} дн")
         if hours > 0: parts.append(f"{hours} ч")
         if minutes > 0: parts.append(f"{minutes} мин")
-
         return " ".join(parts) if parts else "меньше минуты"
 
     except Exception as e:
@@ -148,7 +139,7 @@ class Nav:
     async def cmd_start(message: Message):
         await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
         try:
-            await add_user(0.1, str(message.chat.id))
+            await add_user(1, str(message.chat.id))
             await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
         except ZeroDivisionError:
             x = await get_link(message.chat.id)
@@ -210,14 +201,14 @@ class Buy_Sub:
             except:
                 f = await start_update(int(mons), callback_query.message.chat.id, 0)
                 #str(callback_query.message.from_user.id))
-            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f[0]}', reply_markup=exam(f[1]))
+            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f[0]}', reply_markup=kb.check_pay_last_hour())
         else: 
             await callback_query.message.answer(f'{x}')
+@router.callback_query(F.data == 'chek_pay_last_hour1')
+    async def check_pay_last_hour(callback_query: CallbackQuery):
+        await run_sync()
 
-# @router.callback_query(F.data.startswith('exam'))
-#     async def check_pay1(callback_query: CallbackQuery):
-#         x = callback_query.data.split("_")
-#         await start_update(x[1], callback_query.message.chat.id, 1)
+
 
 @router.callback_query(F.data == 'tel_1')
 async def tel_1(callback_query: CallbackQuery):
