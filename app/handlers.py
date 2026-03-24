@@ -25,7 +25,7 @@ async def get_link(tgId):
 
 
 async def add_user(mons, tgId):
-    duration_days = 30
+    duration_days = 3
     duration_days *= int(mons)
     expiryTime = int((time.time() + duration_days * 24 * 60 * 60))
     api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000/")
@@ -139,7 +139,7 @@ class Nav:
     async def cmd_start(message: Message):
         await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
         try:
-            await add_user(0.1, str(message.chat.id))
+            await add_user(1, str(message.chat.id))
             await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
         except ZeroDivisionError:
             x = await get_link(message.chat.id)
