@@ -181,7 +181,6 @@ class Buy_Sub:
     @router.callback_query(F.data.startswith('buy_sub_'))
     async def buy_sub_(callback_query: CallbackQuery):
         mons = callback_query.data[-1]
-        
         if mons == '2':
             mons = '12'
             await sync_payments()
@@ -197,7 +196,7 @@ class Buy_Sub:
         mons = x[2]
         payment_id = x[1]
         if mons == '2':
-
+            await sync_payments()
             mons = '12' 
         x = check_payment_status(payment_id)
         if x == 'Оплата успешно завершена!':
