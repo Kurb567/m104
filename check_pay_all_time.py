@@ -59,8 +59,9 @@ async def start_update(add_months, username, mod):
         print(f"❌ Ошибка продления {username}: {e}")
 
 # --- ОСНОВНАЯ ЛОГИКА ---
-
+i = 0
 async def sync_payments():
+    global i
     # 1. Получаем платежи из ЮKassa за 20 дней
     print("⏳ Получение платежей из ЮKassa...")
     start_time = datetime.now(timezone.utc) - timedelta(days=20)
@@ -83,7 +84,7 @@ async def sync_payments():
         print("⏳ Обработка пользователей...")
         api = MarzbanAPI(base_url=MARZBAN_URL)
         token = await api.get_token(username=ADMIN_USER, password=ADMIN_PASS)
-        i = 0
+
         with open("1.txt", "r", encoding="utf-8") as f:
             i+=1
             for line in f:
