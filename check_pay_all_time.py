@@ -84,7 +84,7 @@ async def sync_payments():
         token = await api.get_token(username=ADMIN_USER, password=ADMIN_PASS)
 
         with open("1.txt", "r", encoding="utf-8") as f:
-            i == 0
+            i = 0
             for line in f:
                 i += 1
                 parts = line.strip().split(" | ")
