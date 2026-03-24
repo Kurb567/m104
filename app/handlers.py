@@ -134,7 +134,7 @@ def create_payment(amount, description, return_url):
 def check_payment_status(payment_id):
     payment = Payment.find_one(payment_id)
     if payment.status == 'waiting_for_capture':
-        return == 'Ожидание списания'
+        return 'Ожидание списания'
     elif payment.status == 'succeeded':
         return "Оплата успешно завершена!"
     elif payment.status == 'canceled':
