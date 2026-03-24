@@ -139,7 +139,7 @@ class Nav:
     async def cmd_start(message: Message):
         await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
         try:
-            await add_user(1, str(message.chat.id))
+            await add_user(0.1, str(message.chat.id))
             await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
         except ZeroDivisionError:
             x = await get_link(message.chat.id)
