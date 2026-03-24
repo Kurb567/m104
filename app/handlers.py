@@ -214,10 +214,10 @@ class Buy_Sub:
         else: 
             await callback_query.message.answer(f'{x}')
 
-@router.callback_query(F.data.startswith('exam'))
-    async def check_pay1(callback_query: CallbackQuery):
-        x = callback_query.data.split("_")
-        await start_update(x[1], callback_query.message.chat.id, 1)
+# @router.callback_query(F.data.startswith('exam'))
+#     async def check_pay1(callback_query: CallbackQuery):
+#         x = callback_query.data.split("_")
+#         await start_update(x[1], callback_query.message.chat.id, 1)
 
 @router.callback_query(F.data == 'tel_1')
 async def tel_1(callback_query: CallbackQuery):
