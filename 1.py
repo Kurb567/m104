@@ -1,4 +1,4 @@
-import asyncio
+2.puimport asyncio
 from aiogram import Bot
 import config as x
 

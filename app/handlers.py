@@ -23,7 +23,7 @@ async def get_link(tgId):
 
 
 async def add_user(mons, tgId):
-    duration_days = 3
+    duration_days = 30
     duration_days *= int(mons)
     expiryTime = int((time.time() + duration_days * 24 * 60 * 60))
     api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000/")
@@ -39,12 +39,6 @@ async def add_user(mons, tgId):
         print(f"Пользователь создан!")
     except Exception as e:
         return 10/0
-
-import datetime
-
-import datetime
-
-import datetime
 
 async def user_info(tgId: str):
     api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000")
@@ -87,19 +81,25 @@ async def user_info(tgId: str):
         return "Пользователя нет, введите /start"
 
 
-async def start_update(add_months, username):
+async def start_update(add_months, username, mod):
     api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000")
     add_gb = add_months * 200
+    new_expire = 0
+    new_limit = 0
     try:
         token = await api.get_token(username="admin", password="56731096842")
         user = await api.get_user(username=username, token=token.access_token)
-        seconds_to_add = add_months * 30 * 24 * 60 * 60
-        current_time = int(time.time())
-        base_time = max(user.expire or 0, current_time)
-        new_expire = base_time + seconds_to_add
-        new_limit = user.data_limit
-        if add_gb > 0:
-            new_limit = (user.data_limit or 0) + (add_gb * 1024**3)
+        if mod == 0:
+            seconds_to_add = add_months * 30 * 24 * 60 * 60
+            current_time = int(time.time())
+            base_time = max(user.expire or 0, current_time)
+            new_expire = base_time + seconds_to_add
+            new_limit = user.data_limit
+            if add_gb > 0:
+                new_limit = (user.data_limit or 0) + (add_gb * 1024**3)
+        if mod == 1: 
+            new_expire = add_months       
+            new_limit = 1000 * 1024**3
         modify_data = UserModify(
             expire=new_expire,
             data_limit=new_limit,
@@ -110,9 +110,9 @@ async def start_update(add_months, username):
             user=modify_data, 
             token=token.access_token
         )
-        return f"Пользователь {username} продлен до: {time.ctime(new_expire)}\n Новый лимит: {updated_user.data_limit / 1024**3:.2f} GB"
+        return [f"Пользователь {username} продлен до: {time.ctime(new_expire)}\n Новый лимит: {updated_user.data_limit / 1024**3:.2f} GB", new_expire]
     except Exception as e:
-        print(f"Ошибка при продлении: {e}")   
+        return(f"Ошибка при продлении: {e}")   
 
 
 def create_payment(amount, description, return_url):
@@ -134,23 +134,21 @@ def create_payment(amount, description, return_url):
 def check_payment_status(payment_id):
     payment = Payment.find_one(payment_id)
     if payment.status == 'waiting_for_capture':
-        pass
+        return == 'Ожидание списания'
     elif payment.status == 'succeeded':
         return "Оплата успешно завершена!"
     elif payment.status == 'canceled':
         return "Оплата отменена."
     elif payment.status == 'pending':
         return "Ожидание оплаты пользователем..."
-    return payment.status  
+    return payment.status
 
- 
-
-class Nav:   
+class Nav:
     @router.message(CommandStart())
     async def cmd_start(message: Message):
         await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
         try:
-            await add_user(1, str(message.chat.id))
+            await add_user(0.1, str(message.chat.id))
             await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
         except ZeroDivisionError:
             x = await get_link(message.chat.id)
@@ -187,8 +185,6 @@ class Nav:
     <blockquote>💳 Можно оплатить приложением банка, СБП и картой МИР</blockquote>"""
         await message.answer(text, parse_mode="HTML", reply_markup=kb.buy_sub_kb)
 
-  
-      
 class Buy_Sub:
     @router.callback_query(F.data.startswith('buy_sub_'))
     async def buy_sub_(callback_query: CallbackQuery):
@@ -210,15 +206,19 @@ class Buy_Sub:
             mons = '12' 
         x = check_payment_status(payment_id)
         if x == 'Оплата успешно завершена!':
-            f = ''
             try: await add_user(int(mons), str(callback_query.message.chat.id))
-            except: f = await start_update(int(mons), callback_query.message.chat.id)#str(callback_query.message.from_user.id)) 
-             
-            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f}')
+            except:
+                f = await start_update(int(mons), callback_query.message.chat.id, 0)
+                #str(callback_query.message.from_user.id))
+            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f[0]}', reply_markup=exam(f[1]))
         else: 
             await callback_query.message.answer(f'{x}')
 
-   
+@router.callback_query(F.data.startswith('exam'))
+    async def check_pay1(callback_query: CallbackQuery):
+        x = callback_query.data.split("_")
+        await start_update(x[1], callback_query.message.chat.id, 1)
+
 @router.callback_query(F.data == 'tel_1')
 async def tel_1(callback_query: CallbackQuery):
     x = await get_link(callback_query.message.chat.id)
