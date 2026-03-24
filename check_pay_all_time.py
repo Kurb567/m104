@@ -84,8 +84,9 @@ async def sync_payments():
         token = await api.get_token(username=ADMIN_USER, password=ADMIN_PASS)
 
         with open("1.txt", "r", encoding="utf-8") as f:
-            i+=1
+            i == 0
             for line in f:
+                i += 1
                 parts = line.strip().split(" | ")
                 if len(parts) < 3: continue
                 
@@ -101,7 +102,7 @@ async def sync_payments():
                     if days_left < 20:
                         await start_update(mons_from_pay, username, 0)
                     else:
-                        print(f"⏭️ {username} пропущен (осталось {int(days_left)} дн.)")
+                        print(f"{i} - ⏭️ {username} пропущен (осталось {int(days_left)} дн.)")
                 
                 except Exception as e:
                     if "404" in str(e):
