@@ -201,7 +201,7 @@ class Buy_Sub:
             except:
                 f = await start_update(int(mons), callback_query.message.chat.id, 0)
                 #str(callback_query.message.from_user.id))
-            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f[0]}', reply_markup=kb.check_pay1('bjb'))
+            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f[0]}', reply_markup=kb.sos_kb(callback_query.message.chat.id))
         else: 
             await callback_query.message.answer(f'{x}')
 
