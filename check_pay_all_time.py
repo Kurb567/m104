@@ -62,7 +62,7 @@ async def start_update(add_months, username, mod):
 async def sync_payments():
     # 1. Получаем платежи из ЮKassa за 20 дней
     print("⏳ Получение платежей из ЮKassa...")
-    start_time = datetime.now(timezone.utc) - timedelta(days=180)
+    start_time = datetime.now(timezone.utc) - timedelta(days=360)
     
     try:
         res = Payment.list({"created_at.gte": start_time.isoformat(), "limit": 100})
