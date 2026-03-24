@@ -83,8 +83,9 @@ async def sync_payments():
         print("⏳ Обработка пользователей...")
         api = MarzbanAPI(base_url=MARZBAN_URL)
         token = await api.get_token(username=ADMIN_USER, password=ADMIN_PASS)
-
+        i = 0
         with open("1.txt", "r", encoding="utf-8") as f:
+            i+=1
             for line in f:
                 parts = line.strip().split(" | ")
                 if len(parts) < 3: continue
@@ -101,7 +102,7 @@ async def sync_payments():
                     if days_left < 20:
                         await start_update(mons_from_pay, username, 0)
                     else:
-                        print(f"⏭️ {username} пропущен (осталось {int(days_left)} дн.)")
+                        print(f"{i}⏭️ {username} пропущен (осталось {int(days_left)} дн.)")
                 
                 except Exception as e:
                     if "404" in str(e):
