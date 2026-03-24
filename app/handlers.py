@@ -7,7 +7,7 @@ from marzban import MarzbanAPI, UserCreate
 from marzban.models import UserModify
 import app.keyboard as kb
 from check_pay_last_hour import *
-from check_pay_all_time.py import *
+from check_pay_all_time import *
 import config as x
 import json 
 import random 
