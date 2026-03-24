@@ -206,7 +206,7 @@ class Buy_Sub:
             await callback_query.message.answer(f'{x}')
 
 @router.callback_query(F.data == 'chek_pay_last_hour1')
-async def check_pay_last_hour(callback_query: CallbackQuery):
+async def check_pay_last_hour1(callback_query: CallbackQuery):
     print(1)
     await run_sync()
 
