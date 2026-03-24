@@ -207,19 +207,7 @@ class Buy_Sub:
 
 @router.callback_query(F.data == 'chek_pay_last_hour1')
 async def check_pay_last_hour(callback_query: CallbackQuery):
-    # 1. Отвечаем телеграму, чтобы кнопка перестала "думать"
-    await callback_query.answer("Запускаю проверку платежей...")
-    
-    # 2. Сообщаем пользователю в чат (опционально)
-    await callback_query.message.answer("⏳ Синхронизация за последний час запущена...")
-    
-    # 3. Выполняем саму логику
     await run_sync()
-    
-    # 4. Уведомляем о завершении
-    await callback_query.message.answer("✅ Проверка завершена!")
-
-
 
 
 @router.callback_query(F.data == 'tel_1')

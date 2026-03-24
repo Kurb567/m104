@@ -29,7 +29,7 @@ buy_sub_kb = InlineKeyboardMarkup(inline_keyboard=[
 
 def sos_kb(id1):
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Тех поддержка', url=f'tg://resolve?domain=Kurbanali567&text=ID пользователя:{id1}')], ])
-def check_pay_last_hour:
+def check_pay_last_hour():
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Проверить оплату', callback_data="check_pay_last_hour1")], ])
 
 
