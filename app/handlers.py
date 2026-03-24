@@ -7,7 +7,6 @@ from marzban import MarzbanAPI, UserCreate
 from marzban.models import UserModify
 import app.keyboard as kb
 from check_pay_last_hour import *
-from check_pay_all_time import *
 import config as x
 import json 
 import random 
@@ -180,10 +179,10 @@ class Nav:
 class Buy_Sub:
     @router.callback_query(F.data.startswith('buy_sub_'))
     async def buy_sub_(callback_query: CallbackQuery):
+        await run_sync()
         mons = callback_query.data[-1]
         if mons == '2':
             mons = '12'
-            await sync_payments()
         rub = f'{int(mons)*150}.00'  
         url, payment_id = create_payment(rub, str(callback_query.message.chat.id), "https://t.me/HappPlus_bot")
         text = f"""💳 Оформление продления \n\n⏱️ Срок: {int(mons)*30} дней\n💰 Стоимость: {int(mons)*150} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>\n<blockquote>После оплаты нажмите <b>Проверить оплату</b></blockquote>"""
@@ -196,7 +195,6 @@ class Buy_Sub:
         mons = x[2]
         payment_id = x[1]
         if mons == '2':
-            await sync_payments()
             mons = '12' 
         x = check_payment_status(payment_id)
         if x == 'Оплата успешно завершена!':
