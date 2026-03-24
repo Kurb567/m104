@@ -190,6 +190,7 @@ class Buy_Sub:
         
     @router.callback_query(F.data.startswith('pay_'))
     async def check_pay(callback_query: CallbackQuery):
+        await run_sync()
         x = callback_query.data.split('_')
         mons = x[2]
         payment_id = x[1]
@@ -201,14 +202,9 @@ class Buy_Sub:
             except:
                 f = await start_update(int(mons), callback_query.message.chat.id, 0)
                 #str(callback_query.message.from_user.id))
-            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f[0]}', reply_markup=kb.sos_kb(callback_query.message.chat.id))
+            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f[0]}')
         else: 
             await callback_query.message.answer(f'{x}')
-
-@router.callback_query(F.text == 'chek_pay')
-async def check_pay_last_hour(callback_query: CallbackQuery):
-    await callback_query.message.answer("Проверка выполняется")
-    await run_sync()
 
 
 @router.callback_query(F.data == 'tel_1')
