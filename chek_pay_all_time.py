@@ -114,5 +114,4 @@ async def sync_payments():
     except Exception as e:
         print(f"🚨 Критическая ошибка: {e}")
 
-if __name__ == "__main__":
-    asyncio.run(sync_payments())
+
