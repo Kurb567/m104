@@ -59,12 +59,10 @@ async def start_update(add_months, username, mod):
         print(f"❌ Ошибка продления {username}: {e}")
 
 # --- ОСНОВНАЯ ЛОГИКА ---
-i = 0
 async def sync_payments():
-    global i
     # 1. Получаем платежи из ЮKassa за 20 дней
     print("⏳ Получение платежей из ЮKassa...")
-    start_time = datetime.now(timezone.utc) - timedelta(days=20)
+    start_time = datetime.now(timezone.utc) - timedelta(days=180)
     
     try:
         res = Payment.list({"created_at.gte": start_time.isoformat(), "limit": 100})
