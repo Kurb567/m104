@@ -190,7 +190,7 @@ class Buy_Sub:
         
     @router.callback_query(F.data.startswith('pay_'))
     async def check_pay(callback_query: CallbackQuery):
-        await run_sync()
+        #await run_sync()
         x = callback_query.data.split('_')
         mons = x[2]
         payment_id = x[1]
