@@ -138,6 +138,14 @@ class Nav:
     @router.message(CommandStart())
     async def cmd_start(message: Message):
         await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
+        await run_sync()
+        try:
+            await add_user(1, str(message.chat.id))
+            await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
+        except ZeroDivisionError:
+            x = await get_link(message.chat.id)
+            await message.answer(f'Вы успешно зарегистрированы') 
+        except TypeError: pass
         try:
             await add_user(1, str(message.chat.id))
             await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
@@ -149,29 +157,35 @@ class Nav:
     @router.message(F.text == '🖥 Подключится')
     async def install_app(message: Message):
         link = await get_link(message.chat.id)
+        await run_sync()
         x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n📱 Устройства Android\n💻 Компьютеры Windows и Linux\n\n Ссылка для ручной установки \n<code>{link}</code>"""
         await message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
 
     @router.message(F.text == 'ℹ️ Статус')
     async def profil(message: Message):
-    
+        await run_sync()
         await message.answer(f"До окончании подписки осталось: <blockquote>{await user_info(str(message.chat.id))}</blockquote>", parse_mode='HTML')
+
     @router.message(F.text == '🆘 Тех поддержка')
     async def sos(message: Message):
+        await run_sync()
         await message.answer('🆘 Тех поддержка', reply_markup=kb.sos_kb(message.chat.id))
     
     @router.callback_query(F.data == 'sos_kb_1')
     async def sos(callback_query: CallbackQuery):
+        await run_sync()
         await callback_query.message.answer('🆘 Тех поддержка', reply_markup=kb.sos_kb(callback_query.message.chat.id))    
 
     @router.callback_query(F.data == 'install_app')
     async def install_app(callback_query: CallbackQuery):
         link = await get_link(callback_query.message.chat.id)
+        await run_sync()
         x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n📱 Устройства Android\n💻 Компьютеры Windows и Linux\n\n Ссылка для ручной установки \n<code>{link}</code>"""
         await callback_query.message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
 
     @router.message(F.text == '💳 Оплатить доступ')
     async def buy_sub(message: Message):
+        await run_sync()
         text = """
     <blockquote>💳 Можно оплатить приложением банка, СБП и картой МИР</blockquote>"""
         await message.answer(text, parse_mode="HTML", reply_markup=kb.buy_sub_kb)
@@ -210,5 +224,6 @@ class Buy_Sub:
 @router.callback_query(F.data == 'tel_1')
 async def tel_1(callback_query: CallbackQuery):
     x = await get_link(callback_query.message.chat.id)
+    await run_sync()
     await callback_query.message.answer(f"""1.Нажмите на ссылку чтобы она скопировалась\n2.Откройте приложение и нажмите плюс в правой верхней части экрана \n<b>3.Выберите импорт из буфера обмена </b>
     <blockquote>Нажмите на ссылку для копирования</blockquote>""", reply_markup=kb.copy(x))
