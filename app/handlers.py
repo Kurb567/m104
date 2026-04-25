@@ -23,7 +23,6 @@ async def get_link(tgId):
     user = await api.get_user(username=tgId, token=token.access_token)
     return user.subscription_url
 
-
 async def add_user(mons, tgId):
     duration_days = 3
     duration_days *= int(mons)
@@ -71,7 +70,6 @@ async def user_info(tgId: str):
         print(f"Ошибка Marzban API: {e}")
         return "Пользователя нет, введите /start"
 
-
 async def start_update(add_months, username, mod):
     api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000")
     add_gb = add_months * 200
@@ -104,7 +102,6 @@ async def start_update(add_months, username, mod):
         return [f"Пользователь {username} продлен до: {time.ctime(new_expire)}\n Новый лимит: {updated_user.data_limit / 1024**3:.2f} GB", new_expire]
     except Exception as e:
         return(f"Ошибка при продлении: {e}")   
-
 
 def create_payment(amount, description, return_url):
     idempotence_key = str(uuid.uuid4())
@@ -164,7 +161,8 @@ class Nav:
     @router.message(F.text == 'ℹ️ Статус')
     async def profil(message: Message):
         await run_sync()
-        await message.answer(f"До окончании подписки осталось: <blockquote>{await user_info(str(message.chat.id))}</blockquote>", parse_mode='HTML')
+        x = await get_link(message.chat.id)
+        await message.answer(f"До окончании подписки осталось: <blockquote>{await user_info(str(message.chat.id))}</blockquote>", parse_mode='HTML', reply_markup=kb.status_kb(x))
 
     @router.message(F.text == '🆘 Тех поддержка')
     async def sos(message: Message):
@@ -225,5 +223,6 @@ class Buy_Sub:
 async def tel_1(callback_query: CallbackQuery):
     x = await get_link(callback_query.message.chat.id)
     await run_sync()
-    await callback_query.message.answer(f"""1.Нажмите на ссылку чтобы она скопировалась\n2.Откройте приложение и нажмите плюс в правой верхней части экрана \n<b>3.Выберите импорт из буфера обмена </b>
+    await callback_query.message.answer(f"""1.Нажмите на ссылку чтобы она скопировалась\n2.Откройте приложение и нажмите <b>ПЛЮС</b> в правой верхней части экрана \n<b>3.Выберите импорт из буфера обмена </b>
     <blockquote>Нажмите на ссылку для копирования</blockquote>""", reply_markup=kb.copy(x))
+    

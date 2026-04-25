@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, CopyTextButton
+import app.handlers as h1
 
 
 cmd_start_kb = ReplyKeyboardMarkup(keyboard=[
@@ -7,14 +8,8 @@ cmd_start_kb = ReplyKeyboardMarkup(keyboard=[
 ], resize_keyboard=True)
 
 install_app_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Скачать IOS 🍏', url='https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973'),
-    InlineKeyboardButton(text='Подключить IOS 🍏', callback_data='tel_1')],
-    [InlineKeyboardButton(text='Скачать Android 📱',url='https://play.google.com/store/apps/details?id=com.happproxy&hl=ru&pli=1'),
-    InlineKeyboardButton(text='Подключить Android 📱', callback_data='tel_1')],
-    [InlineKeyboardButton(text='Скачать Windows 💻', url='https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe'),
-    InlineKeyboardButton(text='Подключить Windows 💻', callback_data='tel_1')],
-    [InlineKeyboardButton(text='Скачать Mac OS 🍏', url='https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973'),
-    InlineKeyboardButton(text='Подключить MacOS 🍏', callback_data='tel_1')],
+    [InlineKeyboardButton(text='Скачать Приложение', url='https://happ.su'),
+    InlineKeyboardButton(text='Подключить подписку', callback_data='tel_1')],
     [InlineKeyboardButton(text='🆘 Тех поддержка', callback_data='sos_kb_1')]
     ])
 
@@ -31,7 +26,11 @@ def sos_kb(id1):
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Тех поддержка', url=f'tg://resolve?domain=Kurbanali567&text=ID пользователя:{id1}')], ])
 
 def check_pay(url, payment_id, mons):
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = '💳 Оплатить', url=f'{url}')], [InlineKeyboardButton(text = 'Проверить оплату', callback_data=f'pay_{payment_id}_{mons}')]])
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text = '💳 Оплатить', url=f'{url}')]])
 
 def copy(x):
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Копировать', copy_text=CopyTextButton(text=x)),]])
+
+def status_kb(x):
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Открыть ссылку', url=x),]])
+    
