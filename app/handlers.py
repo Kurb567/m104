@@ -129,7 +129,7 @@ class Nav:
     <blockquote>💳 Можно оплатить приложением банка, СБП и картой МИР</blockquote>"""
         await message.answer(text, parse_mode="HTML", reply_markup=kb.buy_sub_kb)
 
-class Payment:
+class Paymen1t:
     @router.callback_query(F.data.startswith('buy_sub_'))
     async def buy_sub_(callback_query: CallbackQuery):
         mons = callback_query.data[-1]
