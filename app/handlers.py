@@ -6,7 +6,6 @@ from yookassa import Configuration, Payment
 from marzban import MarzbanAPI, UserCreate
 from marzban.models import UserModify
 import app.keyboard as kb
-from check_pay_last_hour import *
 import config as x
 import json 
 import random 
@@ -33,7 +32,7 @@ async def add_user(mons, tgId):
     new_user = UserCreate(
         username=str(tgId),
         proxies={"vless": { "flow": "xtls-rprx-vision" }, "trojan":{}, "vmess":{}}, 
-        data_limit=200*1024*1024*1024, # 5 ГБ в байтах
+        data_limit=20*1024*1024*1024, # 20 ГБ в байтах
         expire=expiryTime)
     try:
         user = await api.add_user(user=new_user, token=token.access_token)
@@ -70,38 +69,6 @@ async def user_info(tgId: str):
         print(f"Ошибка Marzban API: {e}")
         return "Пользователя нет, введите /start"
 
-async def start_update(add_months, username, mod):
-    api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000")
-    add_gb = add_months * 200
-    new_expire = 0
-    new_limit = 0
-    try:
-        token = await api.get_token(username="admin", password="56731096842")
-        user = await api.get_user(username=username, token=token.access_token)
-        if mod == 0:
-            seconds_to_add = add_months * 30 * 24 * 60 * 60
-            current_time = int(time.time())
-            base_time = max(user.expire or 0, current_time)
-            new_expire = base_time + seconds_to_add
-            new_limit = user.data_limit
-            if add_gb > 0:
-                new_limit = (user.data_limit or 0) + (add_gb * 1024**3)
-        if mod == 1: 
-            new_expire = add_months       
-            new_limit = 1000 * 1024**3
-        modify_data = UserModify(
-            expire=new_expire,
-            data_limit=new_limit,
-            status="active" 
-        )
-        updated_user = await api.modify_user(
-            username=username, 
-            user=modify_data, 
-            token=token.access_token
-        )
-        return [f"Пользователь {username} продлен до: {time.ctime(new_expire)}\n Новый лимит: {updated_user.data_limit / 1024**3:.2f} GB", new_expire]
-    except Exception as e:
-        return(f"Ошибка при продлении: {e}")   
 
 def create_payment(amount, description, return_url):
     idempotence_key = str(uuid.uuid4())
@@ -119,30 +86,10 @@ def create_payment(amount, description, return_url):
     }, idempotence_key)
     return payment.confirmation.confirmation_url, payment.id
 
-def check_payment_status(payment_id):
-    payment = Payment.find_one(payment_id)
-    if payment.status == 'waiting_for_capture':
-        return 'Ожидание списания'
-    elif payment.status == 'succeeded':
-        return "Оплата успешно завершена!"
-    elif payment.status == 'canceled':
-        return "Оплата отменена."
-    elif payment.status == 'pending':
-        return "Ожидание оплаты пользователем..."
-    return payment.status
-
 class Nav:
     @router.message(CommandStart())
     async def cmd_start(message: Message):
         await message.answer(f'Добрый день, {message.chat.first_name}!', reply_markup=kb.cmd_start_kb)
-        await run_sync()
-        try:
-            await add_user(1, str(message.chat.id))
-            await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
-        except ZeroDivisionError:
-            x = await get_link(message.chat.id)
-            await message.answer(f'Вы успешно зарегистрированы') 
-        except TypeError: pass
         try:
             await add_user(1, str(message.chat.id))
             await message.answer('Ваш новый аккаунт активирован! У вас есть бесплатный тестовый период на 3 дня. Нажмите ниже, чтобы подключиться и начать пользоваться сервисом', reply_markup=kb.install_app_step)
@@ -154,70 +101,53 @@ class Nav:
     @router.message(F.text == '🖥 Подключится')
     async def install_app(message: Message):
         link = await get_link(message.chat.id)
-        await run_sync()
         x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n📱 Устройства Android\n💻 Компьютеры Windows и Linux\n\n Ссылка для ручной установки \n<code>{link}</code>"""
         await message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
 
     @router.message(F.text == 'ℹ️ Статус')
     async def profil(message: Message):
-        await run_sync()
         x = await get_link(message.chat.id)
         await message.answer(f"До окончании подписки осталось: <blockquote>{await user_info(str(message.chat.id))}</blockquote>", parse_mode='HTML', reply_markup=kb.status_kb(x))
 
     @router.message(F.text == '🆘 Тех поддержка')
     async def sos(message: Message):
-        await run_sync()
         await message.answer('🆘 Тех поддержка', reply_markup=kb.sos_kb(message.chat.id))
     
     @router.callback_query(F.data == 'sos_kb_1')
     async def sos(callback_query: CallbackQuery):
-        await run_sync()
         await callback_query.message.answer('🆘 Тех поддержка', reply_markup=kb.sos_kb(callback_query.message.chat.id))    
 
     @router.callback_query(F.data == 'install_app')
     async def install_app(callback_query: CallbackQuery):
         link = await get_link(callback_query.message.chat.id)
-        await run_sync()
         x=f"""<b>Подключение к VPN происходит в 2 шага:</b>\n <blockquote>1. Кнопка "Скачать" - для загрузки приложения\n2. Кнопка "Подключить" - для добавления локаций</blockquote>\n\n🍏 iOS - iPhone, iPad и Mac\n📱 Устройства Android\n💻 Компьютеры Windows и Linux\n\n Ссылка для ручной установки \n<code>{link}</code>"""
         await callback_query.message.answer(x, parse_mode='HTML', reply_markup=kb.install_app_kb)
 
     @router.message(F.text == '💳 Оплатить доступ')
     async def buy_sub(message: Message):
-        await run_sync()
         text = """
     <blockquote>💳 Можно оплатить приложением банка, СБП и картой МИР</blockquote>"""
         await message.answer(text, parse_mode="HTML", reply_markup=kb.buy_sub_kb)
 
-class Buy_Sub:
+class Payment:
     @router.callback_query(F.data.startswith('buy_sub_'))
     async def buy_sub_(callback_query: CallbackQuery):
-        await run_sync()
         mons = callback_query.data[-1]
         if mons == '2':
             mons = '12'
         rub = f'{int(mons)*150}.00'  
         url, payment_id = create_payment(rub, str(callback_query.message.chat.id), "https://t.me/HappPlus_bot")
-        text = f"""💳 Оформление продления \n\n⏱️ Срок: {int(mons)*30} дней\n💰 Стоимость: {int(mons)*150} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>\n<blockquote>После оплаты нажмите <b>Проверить оплату</b></blockquote>"""
+        text = f"""💳 Оформление продления \n\n⏱️ Срок: {int(mons)*30} дней\n💰 Стоимость: {int(mons)*150} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>"""
         await callback_query.message.answer(text, reply_markup=kb.check_pay(url, payment_id, mons))
-        
-    @router.callback_query(F.data.startswith('pay_'))
-    async def check_pay(callback_query: CallbackQuery):
-        #await run_sync()
-        x = callback_query.data.split('_')
-        mons = x[2]
-        payment_id = x[1]
-        if mons == '2':
-            mons = '12' 
-        x = check_payment_status(payment_id)
-        if x == 'Оплата успешно завершена!':
-            try: await add_user(int(mons), str(callback_query.message.chat.id))
-            except:
-                f = await start_update(int(mons), callback_query.message.chat.id, 0)
-                #str(callback_query.message.from_user.id))
-            await callback_query.message.edit_text(f'✅ Подписка продлена \n {f[0]}')
-        else: 
-            await callback_query.message.answer(f'{x}')
 
+    @router.callback_query(F.data[-1] == 'b')
+    async def buy_sub_(callback_query: CallbackQuery):
+        if callback_query.data == 'buy_20_gb': rub = '60.00'
+        elif callback_query.data == 'buy_50_gb': rub = '150.00'
+        elif callback_query.data == 'buy_100_gb': rub = '300.00'
+        url, payment_id = create_payment(rub, f"{callback_query.message.chat.id}_add_gb", "https://t.me/HappPlus_bot")
+        text = f"💳 Докупка трафика \n\n Трафик: {rub/3} ГБ\n💰 Стоимость: {rub} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>"
+        await callback_query.message.answer(text, reply_markup=kb.check_pay(url, payment_id, mons))
 
 @router.callback_query(F.data == 'tel_1')
 async def tel_1(callback_query: CallbackQuery):

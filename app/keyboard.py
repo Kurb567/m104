@@ -1,5 +1,4 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, CopyTextButton
-import app.handlers as h1
 
 
 cmd_start_kb = ReplyKeyboardMarkup(keyboard=[
@@ -8,8 +7,8 @@ cmd_start_kb = ReplyKeyboardMarkup(keyboard=[
 ], resize_keyboard=True)
 
 install_app_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Скачать Приложение', url='https://happ.su'),
-    InlineKeyboardButton(text='Подключить подписку', callback_data='tel_1')],
+    [InlineKeyboardButton(text='Скачать Приложение', url='https://happ.su')],
+    [InlineKeyboardButton(text='Подключить подписку', callback_data='tel_1')],
     [InlineKeyboardButton(text='🆘 Тех поддержка', callback_data='sos_kb_1')]
     ])
 
@@ -20,6 +19,9 @@ buy_sub_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='💳 3 мес | 450р', callback_data='buy_sub_3')],
     [InlineKeyboardButton(text='💳 6 мес | 900р', callback_data='buy_sub_6')],
     [InlineKeyboardButton(text='💳 12 мес | 1800р', callback_data='buy_sub_12')],
+    [InlineKeyboardButton(text='💳 20 ГБ | 60р', callback_data='buy_20_gb')],
+    [InlineKeyboardButton(text='💳 50 ГБ | 150р', callback_data='buy_50_gb')],
+    [InlineKeyboardButton(text='💳 100 ГБ | 300р', callback_data='buy_100_gb')],
      ])
 
 def sos_kb(id1):
