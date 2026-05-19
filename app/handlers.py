@@ -5,6 +5,7 @@ from aiogram.enums import ParseMode
 from yookassa import Configuration, Payment
 from marzban import MarzbanAPI, UserCreate
 from marzban.models import UserModify
+from check_pay_last_hour import *
 import app.keyboard as kb
 import config as x
 import json 
@@ -32,7 +33,7 @@ async def add_user(mons, tgId):
     new_user = UserCreate(
         username=str(tgId),
         proxies={"vless": { "flow": "xtls-rprx-vision" }, "trojan":{}, "vmess":{}}, 
-        data_limit=20*1024*1024*1024, # 20 ГБ в байтах
+        data_limit=200*1024*1024*1024, # 200 ГБ в байтах
         expire=expiryTime)
     try:
         user = await api.add_user(user=new_user, token=token.access_token)
@@ -139,20 +140,26 @@ class Paymen1t:
         url, payment_id = create_payment(rub, str(callback_query.message.chat.id), "https://t.me/HappPlus_bot")
         text = f"""💳 Оформление продления \n\n⏱️ Срок: {int(mons)*30} дней\n💰 Стоимость: {int(mons)*150} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>"""
         await callback_query.message.answer(text, reply_markup=kb.check_pay(url, payment_id, mons))
+        for i in range(15):
+            await asyncio.sleep(60)
+            await run_sync()
 
     @router.callback_query(F.data[-1] == 'b')
     async def buy_sub_(callback_query: CallbackQuery):
-        if callback_query.data == 'buy_20_gb': rub = '60.00'
-        elif callback_query.data == 'buy_50_gb': rub = '150.00'
-        elif callback_query.data == 'buy_100_gb': rub = '300.00'
+        if callback_query.data == 'buy_200_gb': rub = '60.00'
+        elif callback_query.data == 'buy_500_gb': rub = '150.00'
+        elif callback_query.data == 'buy_1000_gb': rub = '300.00'
         url, payment_id = create_payment(rub, f"{callback_query.message.chat.id}_add_gb", "https://t.me/HappPlus_bot")
-        text = f"💳 Докупка трафика \n\n Трафик: {rub/3} ГБ\n💰 Стоимость: {rub} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>"
-        await callback_query.message.answer(text, reply_markup=kb.check_pay(url, payment_id, mons))
+        text = f"💳 Докупка трафика \n\n Трафик: {float(rub)/3} ГБ\n💰 Стоимость: {rub} RUB\n\nНажмите кнопку «💳 Оплатить» ниже, чтобы перейти к оплате.\n\nID операции: <code>{payment_id}</code>"
+        await callback_query.message.answer(text, reply_markup=kb.check_pay(url, payment_id, '1'))
+        for i in range(15):
+            await run_sync()
+            await asyncio.sleep(60)
+            
 
 @router.callback_query(F.data == 'tel_1')
 async def tel_1(callback_query: CallbackQuery):
     x = await get_link(callback_query.message.chat.id)
-    await run_sync()
     await callback_query.message.answer(f"""1.Нажмите на ссылку чтобы она скопировалась\n2.Откройте приложение и нажмите <b>ПЛЮС</b> в правой верхней части экрана \n<b>3.Выберите импорт из буфера обмена </b>
     <blockquote>Нажмите на ссылку для копирования</blockquote>""", reply_markup=kb.copy(x))
     

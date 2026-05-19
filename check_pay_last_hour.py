@@ -3,6 +3,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from yookassa import Payment
 import yookassa
+import os
 import config as x
 from marzban import MarzbanAPI, UserModify, UserCreate
 
@@ -18,7 +19,7 @@ async def add_new_user(api, token, username, mons):
         new_user = UserCreate(
             username=str(username),
             proxies={"vless": {"flow": "xtls-rprx-vision"}, "trojan": {}, "vmess": {}}, 
-            data_limit=int(mons) * 20 * 1024**3,
+            data_limit=int(mons) * 200 * 1024**3,
             expire=expiry_time
         )
         await api.add_user(user=new_user, token=token.access_token)
@@ -32,7 +33,7 @@ async def update_existing_user(api, token, user, mons):
     add_seconds = int(mons) * 30 * 24 * 60 * 60
     base_time = user.expire if (user.expire and user.expire > current_time) else current_time
     new_expire = base_time + add_seconds
-    new_limit = (user.data_limit or 0) + (int(mons) * 20 * 1024**3)
+    new_limit = (user.data_limit or 0) + (int(mons) * 200 * 1024**3)
     try:
         modify_data = UserModify(expire=new_expire, data_limit=new_limit, status="active")
         await api.modify_user(username=user.username, user=modify_data, token=token.access_token)
@@ -57,38 +58,50 @@ async def run_sync():
         if not payments.items:
             print("💤 Новых успешных платежей нет.")
             return
+        print(f"✅ Найдено {len(payments.items)} платежей за последний час.")
         
-        
+       
+
+# Путь к файлу логов
+        LOG_FILE = "pay_log.txt"
+
+        # Предварительно создаем файл, если его нет, чтобы избежать ошибок чтения
+        if not os.path.exists(LOG_FILE):
+            open(LOG_FILE, "a").close()
         for p in payments.items:
-            if p.status == 'succeeded' and p.description: 
+            # 1. Исправлено: Добавлены кавычки для статуса
+            if p.status == "succeeded" and p.description:
+                # 2. Исправлено: Кавычки в f-строке
+                print(f"🔍 Обработка платежа {p.id} для {p.description} на сумму {p.amount.value} {p.amount.currency}")
+                
                 username = p.description.strip()
-                mons = int(float(p.amount.value) // 150)
+                amount_float = float(p.amount.value)
+                mons = int(amount_float // 150)
                 gb = 0
-                if username[-7:] == "_add_gb":
-                    gb = int(float(p.amount.value) // 3)
+                
+                # 3. Исправлено: Кавычки для строки суффикса
+                if username.endswith("_add_gb"):
+                    gb = int(amount_float // 3) * 10 # 1 ГБ стоит 3 рубля, умножаем на 10 для получения количества ГБ
                     username = username[:-7]
+                    
                 try:
                     user = await api.get_user(username=username, token=token.access_token)
-                    file1 = open("pay_log.txt", "r")
-                    if not p.id in file1.read():
+                    
+                    # 4. Исправлено: Безопасное чтение файла через context manager
+                    with open(LOG_FILE, "r") as file1:
+                        log_content = file1.read().splitlines() # Читаем как список строк для точного совпадения ID
+                        
+                    if p.id not in log_content:
                         if gb == 0:
                             await update_existing_user(api, token, user, mons)
-                            with open("pay_log.txt", "a") as file:
-                                file.write(p.id)
-                                file.close()
                         else:
                             await add_gb_to_user(api, token, user, gb)
-                            with open("pay_log.txt", "a") as file:
-                                file.write(p.id)          
-                                file.close()
-
-                    
+                        with open(LOG_FILE, "a") as file:
+                            file.write(f"{p.id}\n")
+                            
                 except Exception as e:
-                    if "404" in str(e):
-                        await add_new_user(api, token, username, mons)
-                    else:
-                        print(f"⚠️ Ошибка API для {username}: {e}")
-
+                    print(f"❌ Ошибка при обработке пользователя {username}: {e}")
+            print(f"✅ Синхронизация завершена: {datetime.now()}")
     except Exception as e: pass
         
 
