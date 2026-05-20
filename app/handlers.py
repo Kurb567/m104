@@ -21,7 +21,7 @@ async def get_link(tgId):
     api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000")
     token = await api.get_token(username="admin", password="56731096842")
     user = await api.get_user(username=tgId, token=token.access_token)
-    return user.subscription_ur
+    return user.subscription_url
 
 async def copy_user(source_username: str, target_username: str):
     api = MarzbanAPI(base_url="https://duckdns.org")
@@ -164,18 +164,27 @@ class Nav:
 
     @router.message(F.text == '/a')
     async def a_link(message: Message):
-        await add_user(1, f'{message.chat.id}a')
+        try: 
+            await add_user(1, f'{message.chat.id}a')
+            await message.answer("Пользователь создан")
+        except ZeroDivisionError:
+            await message.answer("Пользователь обновлен")
         await copy_user(message.chat.id, f'{message.chat.id}a')  
 
     @router.message(F.text == '/b')
     async def b_link(message: Message):
-        await add_user(1, f'{message.chat.id}b')
+        try: 
+            await add_user(1, f'{message.chat.id}b')
+            await message.answer("Пользователь создан")
+        except ZeroDivisionError:
+            await message.answer("Пользователь обновлен")
         await copy_user(message.chat.id, f'{message.chat.id}b')  
 
     @router.message(F.text == '/a_get_link')    
     async def a_get_link(message: Message):
         link = await get_link(f'{message.chat.id}a')
         await message.answer(f'Ссылка для пользователя {message.chat.id}a: {link}')
+
 
     @router.message(F.text == '/b_get_link')    
     async def b_get_link(message: Message):
@@ -184,7 +193,17 @@ class Nav:
 
     @router.callback_query(F.data == 'devices')
     async def devices(callback_query: CallbackQuery):
-        await callback_query.message.answer("Можно подключить до трех устройств введите /a для первого и /b для второго. После этого вы сможете получить ссылки для каждого устройства по командам /a_get_link и /b_get_link соответственно. Введите /a и /b еще раз для обновления ссылок, если вы оплатили продление подписки или докупили трафик")    
+        await callback_query.message.answer(
+    "Можно подключить до трех устройств."
+    "Введите <b>/a</b> для первого и <b>/b</b> для второго. "
+    "После этого вы сможете получить ссылки для каждого устройства "
+    "по командам <b>/a_get_link</b> и <b>/b_get_link</b> соответственно.\n\n"
+    "Введите <b>/a</b> и <b>/b</b> еще раз для обновления ссылок, "
+    "если вы оплатили продление подписки или докупили трафик.",
+    parse_mode="HTML"
+)
+
+
 
     @router.callback_query(F.data == 'sos_kb_1')
     async def sos(callback_query: CallbackQuery):
