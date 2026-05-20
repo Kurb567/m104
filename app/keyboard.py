@@ -9,7 +9,7 @@ cmd_start_kb = ReplyKeyboardMarkup(keyboard=[
 install_app_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Скачать Приложение', url='https://happ.su')],
     [InlineKeyboardButton(text='Подключить подписку', callback_data='tel_1')],
-    [InlineKeyboardButton(text='🆘 Тех поддержка', callback_data='sos_kb_1')]
+    [InlineKeyboardButton(text='Устройства', callback_data='devices')]
     ])
 
 install_app_step = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Подключиться 🚀', callback_data='install_app')]])

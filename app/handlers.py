@@ -21,7 +21,55 @@ async def get_link(tgId):
     api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000")
     token = await api.get_token(username="admin", password="56731096842")
     user = await api.get_user(username=tgId, token=token.access_token)
-    return user.subscription_url
+    return user.subscription_ur
+
+async def copy_user(source_username: str, target_username: str):
+    api = MarzbanAPI(base_url="https://duckdns.org")
+
+    try:
+        token_data = await api.get_token(
+            username="admin", password="56731096842"
+        )
+        token = token_data.access_token
+    except Exception as e:
+        print(f"Ошибка авторизации в Marzban API: {e}")
+        return False
+
+    try:
+        source_user = await api.get_user(username=source_username, token=token)
+        if not source_user:
+            print(f"Пользователь-донор {source_username} не найден.")
+            return False
+
+        source_traffic = source_user.data_limit
+        source_expire = source_user.expire
+
+        target_user = await api.get_user(username=target_username, token=token)
+        if not target_user:
+            print(f"Пользователь-получатель {target_username} не найден.")
+            return False
+
+        updated_data = UserModify(
+            proxies=target_user.proxies,
+            status=target_user.status,
+            on_demand=target_user.on_demand,
+            data_limit=source_traffic,
+            expire=source_expire,
+        )
+
+        await api.modify_user(
+            username=target_username, user=updated_data, token=token
+        )
+
+        print(
+            f"Успешно скопировано! Трафик и время пользователя {source_username} перенесены для {target_username}."
+        )
+        return True
+
+    except Exception as e:
+        print(f"Произошла ошибка при копировании: {e}")
+        return False
+
 
 async def add_user(mons, tgId):
     duration_days = 3
@@ -113,7 +161,31 @@ class Nav:
     @router.message(F.text == '🆘 Тех поддержка')
     async def sos(message: Message):
         await message.answer('🆘 Тех поддержка', reply_markup=kb.sos_kb(message.chat.id))
-    
+
+    @router.message(F.text == '/a')
+    async def a_link(message: Message):
+        await add_user(1, f'{message.chat.id}a')
+        await copy_user(message.chat.id, f'{message.chat.id}a')  
+
+    @router.message(F.text == '/b')
+    async def b_link(message: Message):
+        await add_user(1, f'{message.chat.id}b')
+        await copy_user(message.chat.id, f'{message.chat.id}b')  
+
+    @router.message(F.text == '/a_get_link')    
+    async def a_get_link(message: Message):
+        link = await get_link(f'{message.chat.id}a')
+        await message.answer(f'Ссылка для пользователя {message.chat.id}a: {link}')
+
+    @router.message(F.text == '/b_get_link')    
+    async def b_get_link(message: Message):
+        link = await get_link(f'{message.chat.id}b')
+        await message.answer(f'Ссылка для пользователя {message.chat.id}b: {link}')
+
+    @router.callback_query(F.data == 'devices')
+    async def devices(callback_query: CallbackQuery):
+        await callback_query.message.answer("Можно подключить до трех устройств введите /a для первого и /b для второго. После этого вы сможете получить ссылки для каждого устройства по командам /a_get_link и /b_get_link соответственно. Введите /a и /b еще раз для обновления ссылок, если вы оплатили продление подписки или докупили трафик")    
+
     @router.callback_query(F.data == 'sos_kb_1')
     async def sos(callback_query: CallbackQuery):
         await callback_query.message.answer('🆘 Тех поддержка', reply_markup=kb.sos_kb(callback_query.message.chat.id))    
