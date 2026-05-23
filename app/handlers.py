@@ -24,7 +24,7 @@ async def get_link(tgId):
     return user.subscription_url
 
 async def copy_user(source_username: str, target_username: str):
-    api = MarzbanAPI(base_url="https://duckdns.org")
+    api = MarzbanAPI(base_url="https://panel.567host.tu:8000")
 
     try:
         token_data = await api.get_token(
@@ -75,7 +75,7 @@ async def add_user(mons, tgId):
     duration_days = 3
     duration_days *= int(mons)
     expiryTime = int((time.time() + duration_days * 24 * 60 * 60))
-    api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000/")
+    api = MarzbanAPI(base_url="https://panel.567host.ru:8000/")
     token = await api.get_token(username="admin", password="56731096842")
 
     new_user = UserCreate(
@@ -90,7 +90,7 @@ async def add_user(mons, tgId):
         return 10/0
 
 async def user_info(tgId: str):
-    api = MarzbanAPI(base_url="https://ctjkk.duckdns.org:8000")
+    api = MarzbanAPI(base_url="https://panel.567host.ru:8000")
     try:
         token = await api.get_token(username="admin", password="56731096842")
         user = await api.get_user(username=tgId, token=token.access_token)
