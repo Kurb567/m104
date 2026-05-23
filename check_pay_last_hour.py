@@ -9,7 +9,7 @@ from marzban import MarzbanAPI, UserModify, UserCreate
 
 # --- НАСТРОЙКИ ---
 yookassa.Configuration.configure(x.SHOP_ID, x.SECRET_KEY)
-MARZBAN_URL = "https://ctjkk.duckdns.org:8000"
+MARZBAN_URL = "https://panel.567host.ru:8000"
 ADMIN_USER = "admin"
 ADMIN_PASS = "56731096842"
 
